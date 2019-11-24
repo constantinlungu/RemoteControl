@@ -1,23 +1,21 @@
 import socket
-import time
 
-from mss import mss
-
-
-def take_screenshot(filename):
-    with mss() as sct:
-        sct.shot(output=filename)
-        print(filename)
+import mss
+import mss.tools
 
 
-def send_file(filename):
-    file = open(filename, 'rb')
-    data = file.read(1024)
-    while data:
-        s.send(data)
-        data = file.read(1024)
-    file.close()
-    s.send(b'done')
+def take_screenshot():
+    with mss.mss() as sct:
+        monitor = sct.monitors[1]
+        image = sct.grab(monitor)
+        return mss.tools.to_png(image.rgb, image.size)
+
+
+def send_screenshot(screenshot):
+    print(len(raw_bytes))
+    image_size = len(raw_bytes)
+    s.send(str(image_size).encode())
+    s.sendall(screenshot)
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,6 +24,5 @@ while True:
     command = input('command> ')
     if command == 'ss':
         s.send(bytes(command, "UTF-8"))
-        timestamp = time.strftime('%Y-%m-%d %H-%M-%S') + '.png'
-        take_screenshot(timestamp)
-        send_file(timestamp)
+        raw_bytes = take_screenshot()
+        send_screenshot(raw_bytes)
