@@ -1,27 +1,24 @@
 import socket
-import time
 
 import cv2
+import numpy as np
 
 
 def save_screenshot():
-    filename = time.strftime('%Y-%m-%d-%H-%M-%S') + '.png'
-    file = open(filename, 'wb')
     length = connection.recv(256).decode('UTF-8')
     length = int(length)
     i = 0
+    data = b''
     while i <= length / 1024:
-        data = connection.recv(1024)
-        file.write(data)
+        data += connection.recv(1024)
         i += 1
-    file.close()
     print("File received")
-    show_screenshot(filename)
+    decoded_screenshot = cv2.imdecode(np.frombuffer(data, np.uint8), -1)
+    show_screenshot(decoded_screenshot)
 
 
 def show_screenshot(screenshot):
-    img = cv2.imread(screenshot)
-    cv2.imshow('Screenshot', img)
+    cv2.imshow('Screenshot', screenshot)
     cv2.waitKey(0)  # waits until a key is pressed
     cv2.destroyAllWindows()  # destroys the window showing image
 
