@@ -15,7 +15,9 @@ def send_screenshot(screenshot):
     print(len(raw_bytes))
     image_size = len(raw_bytes)
     s.send(str(image_size).encode())
+    s.recv(256).decode()
     s.sendall(screenshot)
+    s.recv(256).decode()
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,5 +26,6 @@ while True:
     command = input('command> ')
     if command == 'ss':
         s.send(bytes(command, "UTF-8"))
-        raw_bytes = take_screenshot()
-        send_screenshot(raw_bytes)
+        while True:
+            raw_bytes = take_screenshot()
+            send_screenshot(raw_bytes)

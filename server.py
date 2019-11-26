@@ -6,6 +6,7 @@ import numpy as np
 
 def save_screenshot():
     length = connection.recv(256).decode('UTF-8')
+    connection.send("Length received".encode())
     length = int(length)
     i = 0
     data = b''
@@ -15,12 +16,11 @@ def save_screenshot():
     print("File received")
     decoded_screenshot = cv2.imdecode(np.frombuffer(data, np.uint8), -1)
     show_screenshot(decoded_screenshot)
+    connection.send("Image received".encode())
 
 
 def show_screenshot(screenshot):
     cv2.imshow('Screenshot', screenshot)
-    cv2.waitKey(0)  # waits until a key is pressed
-    cv2.destroyAllWindows()  # destroys the window showing image
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,7 +32,11 @@ while True:
     command = connection.recv(256).decode("UTF-8")
     print("Received: ", command)
     if command == "ss":
-        save_screenshot()
+        while True:
+            save_screenshot()
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
+                break
     if "exit" in command:
         break
 
